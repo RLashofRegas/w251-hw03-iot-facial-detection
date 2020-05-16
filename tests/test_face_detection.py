@@ -1,8 +1,17 @@
-"""Tests for the face_detector package."""
+"""Tests for the face_detection package."""
 import pytest
 from os import path
-from edge_device.face_detection import face_detector
+from edge_device.face_detection import face_detector, video_streamer
 import pathlib
+from typing import List
+
+
+class MockFaceDetector(face_detector.IFaceDetector):
+    """Mock for IFaceDetector interface."""
+
+    def get_faces(self, image_path: str) -> List[List[int]]:
+        """Mock implementation for get_faces always returns [[1]]."""
+        return [[1]]
 
 
 class TestFaceDetector:
@@ -21,3 +30,20 @@ class TestFaceDetector:
                 [expected_first_face, expected_second_face], faces):
             for expected_val, actual_val in zip(expected_face, actual_face):
                 assert actual_val == expected_val
+
+
+class TestVideoStreamer:
+    """Tests for the video_streamer module."""
+
+    @staticmethod
+    def _mock_callback(faces: List[List[int]]) -> None:
+        """Mock callback for testing video stream."""
+        assert faces[0][0] == 1
+
+    def test_start_stream(self) -> None:
+        """Test starting a stream with a mock FaceDetector."""
+        face_detector = MockFaceDetector()
+        test_file_path = pathlib.Path(__file__).parent.absolute()
+        test_video_path = str(test_file_path / 'test_video.avi')
+        streamer = video_streamer.VideoStreamer(face_detector, test_video_path)
+        streamer.start_stream(self._mock_callback)

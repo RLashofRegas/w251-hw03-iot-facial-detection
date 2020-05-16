@@ -4,9 +4,19 @@ import cv2 as cv
 from typing import List, Tuple
 import pathlib
 import os
+from abc import ABC, abstractmethod
 
 
-class FaceDetector:
+class IFaceDetector(ABC):
+    """Interface for FaceDetector."""
+
+    @abstractmethod
+    def get_faces(self, image_path: str) -> List[List[int]]:
+        """Return faces for an image."""
+        raise NotImplementedError
+
+
+class FaceDetector(IFaceDetector):
     """Detects faces in images."""
 
     def __init__(
