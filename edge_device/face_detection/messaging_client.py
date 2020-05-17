@@ -17,6 +17,11 @@ class IMessagingClient(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def disconnect(self) -> None:
+        """Disconnect from the message broker."""
+        raise NotImplementedError
+
+    @abstractmethod
     def loop_start(self) -> None:
         """Start new thread to process network traffic with broker."""
         raise NotImplementedError
@@ -53,6 +58,10 @@ class MqttClient(IMessagingClient):
         """Connect asyncronously to Mqtt broker."""
         self._client.connect_async(hostname, port)
 
+    def disconnect(self) -> None:
+        """Disconnect from the message broker."""
+        self._client.disconnect()
+
     def loop_start(self) -> None:
         """Start processing network traffic with broker."""
         self._client.loop_start()
@@ -71,7 +80,8 @@ class MqttClient(IMessagingClient):
         Args:
             output_channel: topic to publish message onto.
             message: message to publish.
-            guarantee_level: mqtt quality of service to use when publishing message.
+            guarantee_level: mqtt quality of service to use when publishing
+                message.
                 0 = at most once, 1 = at least once, 2 = exactly once.
         """
         self._client.publish(output_channel, message, guarantee_level)
@@ -82,12 +92,11 @@ class FaceMessenger:
 
     def __init__(
             self,
-            messaging_client: IMessagingClient = MqttClient(),
             output_channel: str,
             broker_host: str,
             broker_port: int,
-            face_detector: IFaceDetector,
             video_streamer: IVideoStreamer,
+            messaging_client: IMessagingClient = MqttClient(),
             guarantee_level: int = 0) -> None:
         """Initialize the client.
 
@@ -97,7 +106,6 @@ class FaceMessenger:
             output_channel: name of the channel to publish messages to.
             broker_host: hostname or ip address of broker.
             broker_port: port to use when connecting to broker.
-            face_detector: detector used to detect faces in images.
             video_streamer: streamer used to stream video.
             guarantee_level: level of guarantee for message delivery.
                 Defaults to 0 (at most once)
@@ -106,12 +114,12 @@ class FaceMessenger:
         self.output_channel = output_channel
         self.broker_host = broker_host
         self.broker_port = broker_port
-        self.face_detector = face_detector
         self.video_streamer = video_streamer
         self.guarantee_level = guarantee_level
 
-    def process_faces(self, image: np.ndarray, faces: List[List[int]]) -> None:
-        """Send faces to the message broker."""
+    def _process_faces(self, image: np.ndarray,
+                       faces: List[List[int]]) -> None:
+        """Cut faces from image and send to broker."""
         for (x, y, w, h) in faces:
             cut_image = image[y:y + h, x:x + w]
             _, png = cv.imencode('.png', cut_image)
@@ -125,3 +133,6 @@ class FaceMessenger:
         """Start streaming messages."""
         self._client.connect_async(self.broker_host, self.broker_port)
         self._client.loop_start()
+        self.video_streamer.start_stream(self._process_faces)
+        self._client.loop_stop()
+        self._client.disconnect()
