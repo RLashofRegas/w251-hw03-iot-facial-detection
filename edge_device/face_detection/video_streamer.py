@@ -3,9 +3,20 @@ import numpy as np
 import cv2 as cv
 from typing import Union, Callable, List
 from .face_detector import IFaceDetector
+from abc import ABC, abstractmethod
 
 
-class VideoStreamer:
+class IVideoStreamer(ABC):
+    """Interface for VideoStreamer."""
+
+    @abstractmethod
+    def start_stream(self, process_faces: Callable[[
+                     np.ndarray, List[List[int]]], None]) -> None:
+        """Start streaming faces."""
+        raise NotImplementedError
+
+
+class VideoStreamer(IVideoStreamer):
     """Streams video and outputs detected faces."""
 
     def __init__(self, face_detector: IFaceDetector,
@@ -22,7 +33,7 @@ class VideoStreamer:
         self.face_detector = face_detector
 
     def start_stream(self, process_faces: Callable[[
-                     List[List[int]]], None]) -> None:
+                     np.ndarray, List[List[int]]], None]) -> None:
         """Start streaming faces from video_input.
 
         Args:
@@ -37,6 +48,6 @@ class VideoStreamer:
             if(not read_successful):
                 break
             faces = self.face_detector.get_faces(frame)
-            process_faces(faces)
+            process_faces(frame, faces)
 
         capture.release()

@@ -4,6 +4,7 @@ from os import path
 from edge_device.face_detection import face_detector, video_streamer
 import pathlib
 from typing import List
+import numpy as np
 
 
 class MockFaceDetector(face_detector.IFaceDetector):
@@ -36,7 +37,7 @@ class TestVideoStreamer:
     """Tests for the video_streamer module."""
 
     @staticmethod
-    def _mock_callback(faces: List[List[int]]) -> None:
+    def _mock_callback(frame: np.ndarray, faces: List[List[int]]) -> None:
         """Mock callback for testing video stream."""
         assert faces[0][0] == 1
 
