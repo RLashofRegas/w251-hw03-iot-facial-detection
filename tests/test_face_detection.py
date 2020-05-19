@@ -4,11 +4,11 @@ from typing import List, Callable
 import pathlib
 import pytest
 from os import path
-from edge_device.face_detection.face_detector import (
+from edge_device.messenger.face_detection.face_detector import (
     FaceDetector, IFaceDetector)
-from edge_device.face_detection.messaging_client import (
+from edge_device.messenger.face_detection.messaging_client import (
     IMessagingClient, FaceMessenger)
-from edge_device.face_detection.video_streamer import (
+from edge_device.messenger.face_detection.video_streamer import (
     IVideoStreamer, VideoStreamer)
 import cv2 as cv
 

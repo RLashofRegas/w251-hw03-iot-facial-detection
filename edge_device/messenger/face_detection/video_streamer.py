@@ -41,9 +41,12 @@ class VideoStreamer(IVideoStreamer):
                 the frame and performs necessary action.
         """
         capture = cv.VideoCapture(self.video_input)
-        if (not capture.isOpened()):
+
+        input_is_str = isinstance(self.video_input, str)
+        if (input_is_str and not capture.isOpened()):
             capture.open()
-        while(capture.isOpened()):
+
+        while(not input_is_str or capture.isOpened()):
             read_successful, frame = capture.read()
             if(not read_successful):
                 break
