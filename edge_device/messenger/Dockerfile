@@ -1,4 +1,4 @@
-# For more information, please refer to https://aka.ms/vscode-docker-python
+# For more information, please refer to https://aka.ms/vscode-docker-pytho2
 FROM w251/cuda:dev-tx2-4.3_b132
 
 ARG URL=http://169.44.201.108:7002/jetpacks/4.3
@@ -16,6 +16,12 @@ RUN apt remove -y libopencv-calib3d-dev libopencv-core-dev
 RUN apt install -y  libtbb-dev libavcodec-dev libavformat-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgtk2.0-dev
 RUN apt install -y libswscale-dev libv4l-dev
 RUN dpkg -i *.deb
+
+RUN sudo apt install -y python3
+RUN sudo apt install -y python3-dev
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+RUN python3 get-pip.py
 
 WORKDIR /
 

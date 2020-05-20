@@ -3,6 +3,7 @@
 # install docker-compose for arm64 via pip
 sudo apt-get update -y
 sudo apt-get install -y curl
+sudo apt-get install -y libssl-dev
 sudo apt-get install -y libffi-dev
 sudo apt-get install -y python-openssl
 curl -sSL https://bootstrap.pypa.io/get-pip.py | sudo python
