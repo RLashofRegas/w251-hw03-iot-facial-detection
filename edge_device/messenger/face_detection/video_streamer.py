@@ -47,6 +47,8 @@ class VideoStreamer(IVideoStreamer):
             capture.open()
 
         while(not input_is_str or capture.isOpened()):
+            read_successful: bool
+            frame: np.ndarray
             read_successful, frame = capture.read()
             if(not read_successful):
                 break

@@ -1,7 +1,7 @@
 """Classes to aid in detecting faces."""
 import numpy as np
 import cv2 as cv
-from typing import List, Tuple
+from typing import List, Union
 import pathlib
 import os
 from abc import ABC, abstractmethod
@@ -11,7 +11,7 @@ class IFaceDetector(ABC):
     """Interface for FaceDetector."""
 
     @abstractmethod
-    def get_faces(self, image_path: str) -> List[List[int]]:
+    def get_faces(self, image: Union[np.ndarray, str]) -> List[List[int]]:
         """Return faces for an image."""
         raise NotImplementedError
 
@@ -32,22 +32,24 @@ class FaceDetector(IFaceDetector):
         cascadexml_path = str(cv_path / 'data' / f'{classifier}.xml')
         self._face_classifier = cv.CascadeClassifier(cascadexml_path)
 
-    def get_faces(self, image_path: str) -> List[List[int]]:
+    def get_faces(self, image: Union[np.ndarray, str]) -> List[List[int]]:
         """
         Return faces for an image.
 
         Args:
-            image_path: path to image to classify
+            image: image to classify.
+                Either an image as an ndarray or path to an image on disk.
 
         Returns:
             array of tuples for coordinates of faces (x, y, w, h)
         """
-        image = self._read_image(image_path)
+        if(isinstance(image, str)):
+            image = cv.imread(image)
+        image = self._preprocess_image(image)
         faces: List[List[int]] = self._face_classifier.detectMultiScale(
             image, 1.3, 5)
         return faces
 
-    def _read_image(self, image_path: str) -> np.ndarray:
-        raw_image = cv.imread(image_path)
-        grayscale_image = cv.cvtColor(raw_image, cv.COLOR_BGR2GRAY)
+    def _preprocess_image(self, image: np.ndarray) -> np.ndarray:
+        grayscale_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
         return grayscale_image
