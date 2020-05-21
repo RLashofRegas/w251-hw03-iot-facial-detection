@@ -44,4 +44,4 @@ RUN usermod -a -G video appuser
 USER appuser
 
 # During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
-CMD ["python3", "main.py", "-b", "message_broker", "-p", "1883"]
+CMD ["python3", "main.py", "-b", "message_broker", "-p", "1883", "-v", "1"]
