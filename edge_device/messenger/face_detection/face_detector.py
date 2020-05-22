@@ -4,6 +4,7 @@ import cv2 as cv
 from typing import List, Union
 import pathlib
 import os
+import errno
 from abc import ABC, abstractmethod
 
 
@@ -21,16 +22,28 @@ class FaceDetector(IFaceDetector):
 
     def __init__(
             self,
-            classifier: str = 'haarcascade_frontalface_default') -> None:
+            classifier: str = 'haarcascade_frontalface_default.xml') -> None:
         """Initialize classifier used for detecting faces.
 
         Args:
             classifier: openCV classifier to use.
-                Defaults to haarcascade_frontalface_default.
+                Defaults to haarcascade_frontalface_default.xml.
         """
         cv_path = pathlib.Path(os.path.dirname(cv.__file__))
-        cascadexml_path = str(cv_path / 'data' / f'{classifier}.xml')
-        self._face_classifier = cv.CascadeClassifier(cascadexml_path)
+        cv_files = list(cv_path.rglob(classifier))
+        if len(cv_files) > 0:
+            classifier_path = cv_files[0]
+        else:
+            cv_path = pathlib.Path('/usr/share/OpenCV')
+            cv_files = list(cv_path.rglob(classifier))
+            if len(cv_files) > 0:
+                classifier_path = cv_files[0]
+            else:
+                raise FileNotFoundError(
+                    errno.ENOENT, os.strerror(
+                        errno.ENOENT), classifier)
+
+        self._face_classifier = cv.CascadeClassifier(str(classifier_path))
 
     def get_faces(self, image: Union[np.ndarray, str]) -> List[List[int]]:
         """
