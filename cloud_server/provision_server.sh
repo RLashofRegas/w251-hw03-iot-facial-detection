@@ -47,3 +47,4 @@ else
 fi
 ssh $SERVER_IP 'apt install -y docker-compose'
 ssh $SERVER_IP 'apt install -y jq'
+ssh $SERVER_IP 'cd w251-hw03-iot-facial-detection/cloud_server && sh docker_up.sh'
