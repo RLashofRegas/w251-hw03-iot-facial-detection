@@ -42,7 +42,8 @@ class ProcessingClient:
             message: str) -> None:
         object_name: str = str(uuid4())
         print('Received message. Processing...')
-        self._message_saver.store_object(message, object_name, self._channel)
+        self._message_saver.store_object(
+            message, object_name, self._output_channel)
         print('Message processed successfully.')
 
     def start(self) -> None:
