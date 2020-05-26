@@ -1,0 +1,39 @@
+version: '2.4'
+
+services:
+  message_broker:
+    image: edge_message_broker
+    build:
+      context: ./message_broker
+      dockerfile: Dockerfile
+    networks:
+      - face_detection.network
+  
+  message_forwarder:
+    image: edge_message_forwarder
+    build:
+      context: ./message_forwarder
+      dockerfile: Dockerfile
+    ports:
+      - 1883:1883
+    networks:
+      - face_detection.network
+
+  messenger:
+    image: edge_messenger
+    build:
+      context: ./messenger
+      dockerfile: Dockerfile
+    depends_on:
+      - message_broker
+    networks:
+      - face_detection.network
+    runtime: nvidia
+    privileged: true
+    devices:
+      - /dev/video0:/dev/video0
+      - /dev/video1:/dev/video1
+
+networks:
+  face_detection.network:
+    driver: bridge
