@@ -17,7 +17,7 @@ class ProcessingClient:
         """Initialize the client."""
         self._host = broker_host
         self._port = broker_port
-        self._channel = f'{channel}/+'
+        self._channel = channel
         self._client = mqtt.Client()
         self._client.on_connect = self._on_connect
         self._client.on_message = self._on_message
@@ -30,7 +30,7 @@ class ProcessingClient:
             ___: Dict[str, int],
             ____: int) -> None:
         print(f'Connected to message broker. Subscribing to {self._channel}')
-        self._client.subscribe(self._channel)
+        self._client.subscribe(f'{self._channel}/+')
         print(f'Successfully subscribed.')
 
     def _on_message(
