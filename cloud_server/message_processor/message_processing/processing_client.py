@@ -31,7 +31,9 @@ class ProcessingClient:
             __: Dict[str, str],
             ___: Dict[str, int],
             ____: int) -> None:
+        print(f'Connected to message broker. Subscribing to {self._channel}')
         self._client.subscribe(self._channel)
+        print(f'Successfully subscribed.')
 
     def _on_message(
             self,
@@ -39,9 +41,13 @@ class ProcessingClient:
             __: Dict[str, str],
             message: str) -> None:
         object_name: str = str(uuid4())
+        print('Received message. Processing...')
         self._message_saver.store_object(message, object_name, self._channel)
+        print('Message processed successfully.')
 
     def start(self) -> None:
         """Subscribe to messaging server and start processing."""
+        print('Connecting to message broker...')
         self._client.connect(self._host, self._port)
+        print('Connected. Starting loop...')
         self._client.loop_forever()

@@ -22,6 +22,7 @@ class MessageProcessingRunner:
 
     def run(self) -> None:
         """Run the message processing client."""
+        print('Starting message processing.')
         self._processing_client.start()
 
 
