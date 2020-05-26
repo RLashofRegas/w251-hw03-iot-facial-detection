@@ -2,7 +2,7 @@ version: '2.4'
 
 services:
   message_broker:
-    image: message_broker
+    image: edge_message_broker
     build:
       context: ./message_broker
       dockerfile: Dockerfile
@@ -10,9 +10,19 @@ services:
       - 1883:1883
     networks:
       - face_detection.network
+  
+  message_forwarder:
+    image: edge_message_forwarder
+    build:
+      context: ./message_forwarder
+      dockerfile: Dockerfile
+    ports:
+      - 1883:1883
+    networks:
+      - face_detection.network
 
   messenger:
-    image: messenger
+    image: edge_messenger
     build:
       context: ./messenger
       dockerfile: Dockerfile
