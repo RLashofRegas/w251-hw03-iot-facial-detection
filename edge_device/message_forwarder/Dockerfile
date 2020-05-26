@@ -4,6 +4,6 @@ RUN apk update
 
 RUN apk add mosquitto
 
-ADD mosquitto.conf /etc/mosquitto
+ADD mosquitto.conf /etc/mosquitto/.config
 
-CMD ["/usr/sbin/mosquitto", "-v"]
+CMD ["/usr/sbin/mosquitto", "-v", "-c", "/etc/mosquitto/.config/mosquitto.conf"]

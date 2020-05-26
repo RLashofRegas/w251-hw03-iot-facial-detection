@@ -6,8 +6,6 @@ services:
     build:
       context: ./message_broker
       dockerfile: Dockerfile
-    ports:
-      - 1883:1883
     networks:
       - face_detection.network
   
