@@ -17,7 +17,7 @@ class ProcessingClient:
         """Initialize the client."""
         self._host = broker_host
         self._port = broker_port
-        self._channel = channel
+        self._channel = f'{channel}/+'
         output_channel_uuid = str(uuid4()).replace('-', '_')
         self._output_channel = f'{channel}_{output_channel_uuid}'
         self._client = mqtt.Client()
