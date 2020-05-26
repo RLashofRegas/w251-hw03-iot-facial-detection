@@ -18,4 +18,4 @@ ADD . /app
 RUN useradd appuser && chown -R appuser /app
 USER appuser
 
-CMD ["python", "main.py", "-k", "${API_KEY}", "-n", "${CRN}", "-b", "message_broker", "-p", "1883", "-c", "faces"]
+CMD python main.py -k ${API_KEY} -n ${CRN} -b message_broker -p 1883 -c faces

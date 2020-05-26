@@ -20,6 +20,9 @@ services:
             - message_broker
         networks:
             - cloud.message_processing.network
+        environment:
+            - API_KEY
+            - CRN
 
 networks:
     cloud.message_processing.network:

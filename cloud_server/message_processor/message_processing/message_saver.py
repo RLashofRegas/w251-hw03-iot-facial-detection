@@ -44,6 +44,9 @@ class MessageSaver:
             except ClientError as error:
                 print(f'Client error while listing buckets: {error}')
                 raise error
+            except Exception as error:
+                print(f'Unknown exception while listing buckets: {error}')
+                raise error
             if (bucket_name not in existing_buckets):
                 try:
                     print(f'Creating new bucket {bucket_name}.')
@@ -55,6 +58,9 @@ class MessageSaver:
                 except ClientError as error:
                     print(f'Client error while creating bucket: {error}')
                     raise error
+                except Exception as error:
+                    print(f'Unknown exception while creating bucket: {error}')
+                    raise error
                 self._checked_buckets.append(bucket_name)
             else:
                 self._checked_buckets.append(bucket_name)
@@ -65,4 +71,7 @@ class MessageSaver:
             )
         except ClientError as error:
             print(f'Client error while creating object: {error}')
+            raise error
+        except Exception as error:
+            print(f'Unknown exception while creating object: {error}')
             raise error
