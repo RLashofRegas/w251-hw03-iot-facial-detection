@@ -18,8 +18,6 @@ class ProcessingClient:
         self._host = broker_host
         self._port = broker_port
         self._channel = f'{channel}/+'
-        output_channel_uuid = str(uuid4())
-        self._output_channel = f'{channel}-{output_channel_uuid}'
         self._client = mqtt.Client()
         self._client.on_connect = self._on_connect
         self._client.on_message = self._on_message
@@ -39,11 +37,11 @@ class ProcessingClient:
             self,
             _: mqtt.Client,
             __: Dict[str, str],
-            message: str) -> None:
+            message: mqtt.MQTTMessage) -> None:
         object_name: str = str(uuid4())
         print('Received message. Processing...')
         self._message_saver.store_object(
-            message, object_name, self._output_channel)
+            message.payload, object_name, self._channel)
         print('Message processed successfully.')
 
     def start(self) -> None:
