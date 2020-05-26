@@ -22,5 +22,5 @@ services:
             - cloud.message_processing.network
 
 networks:
-    face_detection.network:
+    cloud.message_processing.network:
         driver: bridge
