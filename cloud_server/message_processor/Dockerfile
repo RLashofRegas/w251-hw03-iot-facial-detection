@@ -20,4 +20,4 @@ ADD /root/.bluemix/cos_credentials /cos_credentials
 RUN useradd appuser && chown -R appuser /app
 USER appuser
 
-CMD ["python", "main.py", "-k", "/cos_credentials", "-b", "message_broker", "-p", "1883", "-c", "faces/+"]
+CMD ["python", "main.py", "-k", "${API_KEY}", "-n", "${CRN}", "-b", "message_broker", "-p", "1883", "-c", "faces/+"]

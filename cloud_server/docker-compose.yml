@@ -13,6 +13,9 @@ services:
         
     message_processor:
         image: cloud_message_processor
+        args:
+            - API_KEY=$( jq ".[0].credentials.apikey" /root/.bluemix/cos_credentials )
+            - CRN=$( jq ".[0].crn" /root/.bluemix/cos_credentials )
         build:
             context: ./message_processor
             dockerfile: Dockerfile

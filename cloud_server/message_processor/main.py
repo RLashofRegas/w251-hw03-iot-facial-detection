@@ -3,7 +3,6 @@ import argparse
 from message_processing.message_saver import MessageSaver
 from message_processing.processing_client import ProcessingClient
 from typing import TypedDict, List
-import json
 
 
 class MessageProcessingRunner:
@@ -26,44 +25,15 @@ class MessageProcessingRunner:
         self._processing_client.start()
 
 
-class Credential(TypedDict):
-    """Typed class for credential object in cos_credential."""
-
-    apikey: str
-    endpoints: str
-    iam_apikey_description: str
-    iam_apikey_name: str
-    iam_role_crn: str
-    iam_serviceid_crn: str
-    resource_instance_id: str
-
-
-class CosCredential(TypedDict):
-    """Typed class for cos_credential."""
-
-    guid: str
-    id: str
-    url: str
-    created_at: str
-    updated_at: str
-    deleted_at: str
-    name: str
-    account_id: str
-    resource_group_id: str
-    source_crn: str
-    state: str
-    credentials: Credential
-    iam_compatible: bool
-    resource_instance_url: str
-    crn: str
-
-
 if(__name__ == "__main__"):
     arg_parser = argparse.ArgumentParser(
         description='Run the message processing pipeline.')
     arg_parser.add_argument(
-        '-k', '--credential_file', type=str, required=True,
-        help='Path to the cos credential file.')
+        '-k', '--api_key', type=str, required=True,
+        help='COS API Key.')
+    arg_parser.add_argument(
+        '-n', '--crn', type=str, required=True,
+        help='COS crn.')
     arg_parser.add_argument(
         '-b', '--broker', type=str, required=True,
         help='Hostname of the message broker.')
@@ -74,13 +44,9 @@ if(__name__ == "__main__"):
         '-c', '--channel', type=str, default='faces',
         help='Channel to subscribe to for incoming messages.')
     args = arg_parser.parse_args()
-    credentials: List[CosCredential]
-    with open(args.credential_file, 'r') as credential_file:
-        credentials = json.load(credential_file)
-    credential = credentials[0]
     runner = MessageProcessingRunner(
-        credential['credentials']['apikey'],
-        credential['crn'],
+        args.api_key,
+        args.crn,
         args.broker,
         args.port,
         args.channel)

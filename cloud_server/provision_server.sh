@@ -46,4 +46,4 @@ else
     ssh $SERVER_IP 'git clone https://github.com/RLashofRegas/w251-hw03-iot-facial-detection.git'
 fi
 ssh $SERVER_IP 'apt install -y docker-compose'
-
+ssh $SERVER_IP 'apt install -y jq'
