@@ -18,6 +18,8 @@ class ProcessingClient:
         self._host = broker_host
         self._port = broker_port
         self._channel = channel
+        output_channel_uuid = str(uuid4()).replace('-', '_')
+        self._output_channel = f'{channel}_{output_channel_uuid}'
         self._client = mqtt.Client()
         self._client.on_connect = self._on_connect
         self._client.on_message = self._on_message
