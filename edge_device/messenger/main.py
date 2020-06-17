@@ -1,7 +1,8 @@
 """Entrypoint for the face detection package for the edge_device."""
 import argparse
 from uuid import uuid4
-from face_detection.face_detector import FaceDetector
+from face_detection.face_detector import FaceDetector, IFaceDetector
+from face_detection.neural_face_detector import NeuralFaceDetector
 from face_detection.video_streamer import VideoStreamer
 from face_detection.messaging_client import FaceMessenger
 import os
@@ -16,7 +17,8 @@ class FaceDetectionRunner:
             broker_host: str,
             broker_port: int,
             video_input: int,
-            guarantee_level: int) -> None:
+            guarantee_level: int,
+            face_detector: IFaceDetector) -> None:
         """Initialize the runner.
 
         Args:
@@ -28,7 +30,6 @@ class FaceDetectionRunner:
             guarantee_level: level of guarantee for message delivery.
                 0 = at most once, 1 = at least once, 2 = exactly once.
         """
-        face_detector = FaceDetector()
         video_streamer = VideoStreamer(face_detector, video_input)
         self.messenger = FaceMessenger(
             output_channel,
@@ -64,11 +65,37 @@ if(__name__ == "__main__"):
     arg_parser.add_argument(
         '-g', '--guarantee', type=int, default=0,
         help='Level of guarantee for message delivery.')
+    arg_parser.add_argument(
+        '-d', '--detector', type=str, default=f'neural',
+        help='Whether to use opencv or neural face detector')
+    arg_parser.add_argument(
+        '-f', '--detector_path', type=str,
+        help='Path to detector saved graph.')
+    arg_parser.add_argument(
+        '-w', '--width', type=str,
+        help='Input image width for detector.')
+    arg_parser.add_argument(
+        '-h', '--height', type=str,
+        help='Input image height for detector.')
     args = arg_parser.parse_args()
+    face_detector: IFaceDetector
+    if (args.detector == 'neural'):
+        assert args.detector_path is not None
+        assert args.width is not None
+        assert args.height is not None
+        face_detector = NeuralFaceDetector(
+            args.detector_path, (args.width, args.height))
+    else:
+        if (args.detector_path is not None):
+            face_detector = FaceDetector(args.detector_path)
+        else:
+            face_detector = FaceDetector()
+
     runner = FaceDetectionRunner(
         args.channel,
         args.broker,
         args.port,
         args.video,
-        args.guarantee)
+        args.guarantee,
+        face_detector)
     runner.run()
