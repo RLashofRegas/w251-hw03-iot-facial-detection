@@ -15,14 +15,14 @@ class NeuralFaceDetector(IFaceDetector):
         """Initialize the classifier."""
         self.input_x = input_size[0]
         self.input_y = input_size[1]
-        self.tf_graph = tf.GraphDef()
+        self.tf_graph = tf.compat.v1.GraphDef()
         with open(graph_path, 'rb') as graph:
             self.tf_graph.ParseFromString(graph.read())
-        self.tf_config = tf.ConfigProto()
+        self.tf_config = tf.compat.v1.ConfigProto()
         self.tf_config.gpu_options.allow_growth = True
-        self.tf_session = tf.Session(config=self.tf_config)
+        self.tf_session = tf.compat.v1.Session(config=self.tf_config)
         tf.import_graph_def(self.tf_graph, name='')
-        self.tf_input = self.tf_session.graph.get_tensor_by_name(
+        self.tf_input: tf.Tensor = self.tf_session.graph.get_tensor_by_name(
             'image_tensor:0')
         self.tf_scores = self.tf_session.graph.get_tensor_by_name(
             'detection_scores:0')
@@ -56,28 +56,31 @@ class NeuralFaceDetector(IFaceDetector):
             pillow_image = Image.fromarray(image)
         processed_image = self._preprocess_image(pillow_image)
         boxes = self._get_faces_from_network(processed_image)
+        np_image: np.ndarray = np.array(pillow_image)
         scaler = np.array(
-            [pillow_image.shape[0],
-             pillow_image.shape[1],
-             pillow_image.shape[0],
-             pillow_image.shape[1]])
+            [np_image.shape[0],
+             np_image.shape[1],
+             np_image.shape[0],
+             np_image.shape[1]])
         scaled_boxes: List[List[int]] = [box * scaler for box in boxes]
         return [[box[1], box[0], box[3] - box[1], box[2] - box[0]]
                 for box in scaled_boxes]
 
     def _get_faces_from_network(self, image: np.ndarray) -> List[np.ndarray]:
-        feed_dict: Dict[str, np.ndarray]
-        feed_dict['tf_input'] = image[None, ...]
+        feed_dict: Dict[tf.Tensor, np.ndarray] = {
+            self.tf_input: image[None, ...]
+        }
         scores, boxes_batch, classes, num_detections = self.tf_session.run(
             [self.tf_scores, self.tf_boxes, self.tf_classes, self.
              tf_num_detections],
             feed_dict=feed_dict)
         # index by 0 to remove batch dimension
-        boxes: List[np.ndarray] = boxes_batch[0]
+        boxes: List[np.ndarray] = [box for box, score in zip(
+            boxes_batch[0], scores[0]) if score >= self.detection_threshold]
         return boxes
 
     def _preprocess_image(self, pillow_image: Image) -> np.ndarray:
         resized_image = np.array(
             pillow_image.resize(
-                self.input_x, self.input_y))
+                (self.input_x, self.input_y)))
         return resized_image

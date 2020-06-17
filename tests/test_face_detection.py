@@ -3,6 +3,7 @@ import numpy as np
 from typing import List, Callable
 import pathlib
 import pytest
+from math import isclose
 from os import path
 from edge_device.messenger.face_detection.face_detector import (
     FaceDetector, IFaceDetector)
@@ -10,6 +11,8 @@ from edge_device.messenger.face_detection.messaging_client import (
     IMessagingClient, FaceMessenger)
 from edge_device.messenger.face_detection.video_streamer import (
     IVideoStreamer, VideoStreamer)
+from edge_device.messenger.face_detection.neural_face_detector import (
+    NeuralFaceDetector)
 import cv2 as cv
 
 
@@ -89,7 +92,26 @@ class TestFaceDetector:
         for expected_face, actual_face in zip(
                 [expected_first_face, expected_second_face], faces):
             for expected_val, actual_val in zip(expected_face, actual_face):
-                assert actual_val == expected_val
+                assert expected_val == actual_val
+
+
+class TestNeuralFaceDetector:
+    """Tests for the neural_face_detector module."""
+
+    def test_detect_faces(self) -> None:
+        """Test that faces are detected in sample image."""
+        test_file_path = pathlib.Path(__file__).parent.absolute()
+        image_path = str(test_file_path / 'test_faces.jpg')
+        graph_path = str(test_file_path / 'frozen_inference_graph_face.pb')
+        detector = NeuralFaceDetector(graph_path, (300, 300))
+        faces = detector.get_faces(image_path)
+        assert len(faces) == 2
+        expected_first_face = [306, 96, 125, 124]
+        expected_second_face = [100, 248, 138, 122]
+        for expected_face, actual_face in zip(
+                [expected_first_face, expected_second_face], faces):
+            for expected_val, actual_val in zip(expected_face, actual_face):
+                assert isclose(actual_val, expected_val, abs_tol=2)
 
 
 class TestVideoStreamer:
